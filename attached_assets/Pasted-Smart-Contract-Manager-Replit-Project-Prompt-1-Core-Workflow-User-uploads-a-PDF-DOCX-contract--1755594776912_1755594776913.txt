@@ -1,0 +1,112 @@
+Smart Contract Manager – Replit Project Prompt
+1. Core Workflow
+
+User uploads a PDF/DOCX contract.
+
+Extract and display the contract text in a scrollable document viewer with syntax highlighting.
+
+Send the contract text to the Gemini API (placeholder GEMINI_API_KEY).
+
+Gemini returns:
+
+Flagged risky clauses with explanations.
+
+Risk score (0–100) for the entire contract.
+
+Missing protections (e.g., liability cap, termination rights, confidentiality).
+
+Suggested alternative clauses for balance.
+
+Plain-language summary of key risks.
+
+2. User Interface (SaaS-Style)
+
+Dashboard layout:
+
+Left panel → Contract viewer with highlighted risky clauses.
+
+Right panel → Risk insights, filters, and charts.
+
+Clause Explorer: Clickable table of contents tagged with risk levels.
+
+Highlighting system:
+
+🔴 Red = High risk
+
+🟡 Yellow = Medium risk
+
+🟢 Green = Acceptable clause
+
+Tooltips: Hover → risk explanation & suggestions.
+
+Search/Filter: Keyword search across the contract.
+
+Responsive UI: Works on both desktop & mobile.
+
+3. Advanced Features (Legal AI Essentials)
+
+Clause Comparison: Show Gemini’s safer alternatives right under flagged clauses.
+
+Negotiation Playbook Upload: User uploads JSON/CSV with preferred terms → Gemini customizes risk checks accordingly.
+
+Version Comparison (Redlining): Upload two contracts → highlight changes + risks introduced.
+
+Risk Heatmap Visualization: Pie chart / radar chart of risks by category (Termination, Liability, Confidentiality, Payment).
+
+Toggle Views: Plain English explanations ↔ Detailed Legal View.
+
+Collaboration:
+
+Add inline comments on clauses.
+
+Share analysis via secure link (frontend-only).
+
+Smart Alerts: Show missing protections + suggest sample clauses.
+
+Export Options: Analysis as PDF, Word, or JSON.
+
+Integrations (mock): Buttons for Google Drive, Dropbox, Notion.
+
+Confidence Scores: Show Gemini’s confidence level on each risk finding.
+
+4. Extra Real-World Features (High-Value)
+
+Auto-Risk Benchmarking: Compare contract’s risk score vs. industry average (using Gemini prompt).
+
+Clause Library: Users can save their own approved clauses and insert them into new contracts.
+
+Deal-Type Templates: Choose “Employment Agreement,” “NDA,” “Vendor Contract” → Gemini applies specialized risk checks.
+
+Jurisdiction Awareness: User selects country/state → Gemini adjusts analysis to local laws (simulation).
+
+Obligation Tracker: Extract deadlines, renewal dates, notice periods → display timeline/calendar view.
+
+Quick Q&A Mode: Chatbox → “Does this contract allow auto-renewal?” or “What’s the liability cap?” → Gemini answers directly.
+
+Summary Dashboard: For uploaded contracts → show portfolio view with aggregated risk scores.
+
+Explainability Mode: Show why Gemini flagged something → highlight clause patterns it detected.
+
+Accessibility: Copy-to-clipboard buttons for risks, summaries, and clauses.
+
+5. UX & Design
+
+Clean legal-tech aesthetic: white background, blue/gray palette, card-based UI.
+
+Smooth animations: Highlight transitions, collapsible panels, chart animations.
+
+Loading states: Show spinner + “Analyzing contract with Gemini…” message.
+
+Dark mode toggle.
+
+Quick copy buttons for flagged risks, summaries, and alternative clauses.
+
+6. Frontend-Only Constraint
+
+✅ No backend logic.
+
+✅ All analysis via Gemini API fetch calls.
+
+✅ Use placeholder GEMINI_API_KEY in code.
+
+✅ Modular API calls → easily swappable for real backend later.

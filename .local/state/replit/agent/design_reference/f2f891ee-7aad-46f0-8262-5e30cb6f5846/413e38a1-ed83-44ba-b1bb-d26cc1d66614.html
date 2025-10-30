@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Contract Manager - Legal AI Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: {
+                    'sans': ['Inter', 'system-ui', 'sans-serif'],
+                },
+                colors: {
+                    'risk-high': '#EF4444',
+                    'risk-medium': '#F59E0B', 
+                    'risk-low': '#10B981',
+                    'legal-blue': '#2563EB',
+                    'legal-blue-light': '#3B82F6',
+                    'legal-gray': '#6B7280',
+                    'legal-gray-light': '#9CA3AF',
+                }
+            }
+        }
+    };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 font-sans">
+    <!-- @COMPONENT: AppLayout -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- @COMPONENT: Sidebar -->
+        <div class="hidden md:flex md:w-64 md:flex-col">
+            <div class="flex flex-col flex-grow pt-5 overflow-y-auto bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+                <div class="flex items-center flex-shrink-0 px-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-legal-blue rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-contract text-white text-sm"></i>
+                        </div>
+                        <h1 class="ml-3 text-xl font-bold text-gray-900 dark:text-white">ContractAI</h1>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex-grow flex flex-col">
+                    <nav class="flex-1 px-2 space-y-1">
+                        <a href="#" class="bg-legal-blue text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <i class="fas fa-tachometer-alt mr-3 text-sm"></i>
+                            Dashboard
+                        </a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <i class="fas fa-folder mr-3 text-sm"></i>
+                            Contract Library
+                        </a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <i class="fas fa-chart-line mr-3 text-sm"></i>
+                            Analytics
+                        </a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            <i class="fas fa-cog mr-3 text-sm"></i>
+                            Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainContent -->
+        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+            
+            <!-- @COMPONENT: TopHeader -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-800 shadow border-b border-gray-200 dark:border-gray-700">
+                <button class="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-legal-blue md:hidden">
+                    <i class="fas fa-bars h-6 w-6"></i>
+                </button>
+                
+                <div class="flex-1 px-4 flex justify-between items-center">
+                    <div class="flex-1 flex items-center">
+                        <div class="w-full max-w-lg lg:max-w-xs">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <input class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-legal-blue focus:border-legal-blue" placeholder="Search contracts..." type="search">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ml-4 flex items-center md:ml-6 space-x-3">
+                        <!-- Dark Mode Toggle -->
+                        <button id="darkModeToggle" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-legal-blue">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+                        
+                        <!-- Upload Button -->
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-legal-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-legal-blue">
+                            <i class="fas fa-upload -ml-1 mr-2 h-4 w-4"></i>
+                            Upload Contract
+                        </button>
+                        
+                        <!-- Profile -->
+                        <div class="relative">
+                            <button class="max-w-xs bg-white dark:bg-gray-800 flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-legal-blue">
+                                <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User avatar">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: TopHeader -->
+
+            <!-- @COMPONENT: MainWorkspace -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-none mx-auto px-4 sm:px-6 md:px-8">
+                        
+                        <!-- @COMPONENT: ContractAnalysisHeader -->
+                        <div class="mb-6">
+                            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h2 class="text-lg font-medium text-gray-900 dark:text-white" data-bind="contract.title">Software Development Agreement - TechCorp Inc.</h2>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Uploaded 2 hours ago • <span data-bind="contract.pages">12 pages</span></p>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <!-- @STATE: analysisComplete:boolean = true -->
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full"></div>
+                                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">Analysis Complete</span>
+                                            </div>
+                                            <button class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                <i class="fas fa-download -ml-0.5 mr-2 h-4 w-4"></i>
+                                                Export
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Risk Score Display -->
+                                    <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-4">
+                                        <div class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-4 rounded-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-8 h-8 bg-risk-high rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Risk Score</p>
+                                                    <p class="text-2xl font-bold text-risk-high" data-bind="analysis.riskScore">78</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-8 h-8 bg-legal-blue rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-search text-white text-sm"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Issues Found</p>
+                                                    <p class="text-2xl font-bold text-legal-blue" data-bind="analysis.issuesCount">12</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-4 rounded-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-8 h-8 bg-risk-medium rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-shield-alt text-white text-sm"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Missing Protections</p>
+                                                    <p class="text-2xl font-bold text-risk-medium" data-bind="analysis.missingProtections">5</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-8 h-8 bg-risk-low rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-check-circle text-white text-sm"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Good Clauses</p>
+                                                    <p class="text-2xl font-bold text-risk-low" data-bind="analysis.goodClauses">24</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: ContractAnalysisHeader -->
+
+                        <!-- @COMPONENT: TwoPanelLayout -->
+                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                            
+                            <!-- @COMPONENT: LeftPanel - Contract Viewer -->
+                            <div class="lg:col-span-2">
+                                <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                                    <div class="px-4 py-5 sm:p-6">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Contract Document</h3>
+                                            <div class="flex items-center space-x-2">
+                                                <button class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                    <i class="fas fa-eye mr-1"></i>
+                                                    Plain English
+                                                </button>
+                                                <button class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                    Legal View
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Document Content with Risk Highlighting -->
+                                        <div class="max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+                                            <div class="space-y-4 text-sm">
+                                                <!-- @FUNCTIONALITY: Document viewer should implement syntax highlighting and risk-based highlighting -->
+                                                
+                                                <div class="contract-section">
+                                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">1. DEFINITIONS AND INTERPRETATIONS</h4>
+                                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                        In this Agreement, unless the context otherwise requires, the following terms shall have the meanings set forth below...
+                                                    </p>
+                                                </div>
+
+                                                <div class="contract-section">
+                                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">2. PAYMENT TERMS</h4>
+                                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                        Payment shall be made within 
+                                                        <span class="bg-risk-high/20 px-1 py-0.5 rounded text-risk-high font-medium cursor-pointer" data-risk="high" title="High Risk: Extended payment terms without penalties">
+                                                            ninety (90) days
+                                                        </span>
+                                                        of invoice date. Late payments shall accrue interest at a rate of 
+                                                        <span class="bg-risk-medium/20 px-1 py-0.5 rounded text-risk-medium font-medium cursor-pointer" data-risk="medium" title="Medium Risk: Interest rate below market standard">
+                                                            5% per annum
+                                                        </span>.
+                                                    </p>
+                                                </div>
+
+                                                <div class="contract-section">
+                                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">3. LIABILITY AND INDEMNIFICATION</h4>
+                                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                        <span class="bg-risk-high/20 px-1 py-0.5 rounded text-risk-high font-medium cursor-pointer" data-risk="high" title="High Risk: Unlimited liability exposure">
+                                                            The Company shall be liable for all damages
+                                                        </span>
+                                                        arising from or relating to this Agreement, including but not limited to direct, indirect, incidental, and consequential damages.
+                                                    </p>
+                                                </div>
+
+                                                <div class="contract-section">
+                                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">4. TERMINATION</h4>
+                                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                        This Agreement may be terminated by either party 
+                                                        <span class="bg-risk-medium/20 px-1 py-0.5 rounded text-risk-medium font-medium cursor-pointer" data-risk="medium" title="Medium Risk: Insufficient notice period">
+                                                            upon five (5) days written notice
+                                                        </span>
+                                                        for any reason or no reason.
+                                                    </p>
+                                                </div>
+
+                                                <div class="contract-section">
+                                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">5. CONFIDENTIALITY</h4>
+                                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                        <span class="bg-risk-low/20 px-1 py-0.5 rounded text-risk-low font-medium cursor-pointer" data-risk="low" title="Good Clause: Standard confidentiality protection">
+                                                            Both parties agree to maintain the confidentiality of all proprietary information
+                                                        </span>
+                                                        disclosed during the term of this Agreement.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Quick Actions -->
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <div class="flex items-center space-x-2">
+                                                <button class="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 shadow-sm text-xs leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                    <i class="fas fa-copy mr-1"></i>
+                                                    Copy Text
+                                                </button>
+                                                <button class="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 shadow-sm text-xs leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                    <i class="fas fa-comment mr-1"></i>
+                                                    Add Comment
+                                                </button>
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                Showing clauses 1-5 of 15
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- @COMPONENT: ClauseExplorer -->
+                                <div class="mt-6 bg-white dark:bg-gray-800 shadow rounded-lg">
+                                    <div class="px-4 py-5 sm:p-6">
+                                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Clause Explorer</h3>
+                                        <div class="space-y-2">
+                                            <!-- @MAP: clauses.map(clause => ( -->
+                                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-risk-high rounded-full mr-3"></div>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">Payment Terms</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                                                        High Risk
+                                                    </span>
+                                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-risk-high rounded-full mr-3"></div>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">Liability & Indemnification</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                                                        High Risk
+                                                    </span>
+                                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-risk-medium rounded-full mr-3"></div>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">Termination Clauses</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                                                        Medium Risk
+                                                    </span>
+                                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-risk-low rounded-full mr-3"></div>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">Confidentiality</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                                        Good
+                                                    </span>
+                                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                            <!-- @END_MAP )) -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- @END_COMPONENT: ClauseExplorer -->
+                            </div>
+                            <!-- @END_COMPONENT: LeftPanel -->
+
+                            <!-- @COMPONENT: RightPanel - Risk Insights -->
+                            <div class="lg:col-span-1">
+                                <div class="space-y-6">
+                                    
+                                    <!-- Risk Summary -->
+                                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:p-6">
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Risk Summary</h3>
+                                            
+                                            <!-- Risk Distribution Chart Placeholder -->
+                                            <div class="mb-6">
+                                                <div class="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                    <!-- @FUNCTIONALITY: Implement chart library (Chart.js or D3.js) for risk visualization -->
+                                                    <div class="text-center">
+                                                        <div class="w-24 h-24 mx-auto mb-2 bg-gradient-to-br from-red-400 to-yellow-400 rounded-full flex items-center justify-center">
+                                                            <span class="text-2xl font-bold text-white">78</span>
+                                                        </div>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">Overall Risk Score</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Risk Breakdown -->
+                                            <div class="space-y-3">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm text-gray-600 dark:text-gray-400">Payment Terms</span>
+                                                    <div class="flex items-center">
+                                                        <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                                            <div class="bg-risk-high h-2 rounded-full" style="width: 90%"></div>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-risk-high">90</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm text-gray-600 dark:text-gray-400">Liability</span>
+                                                    <div class="flex items-center">
+                                                        <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                                            <div class="bg-risk-high h-2 rounded-full" style="width: 85%"></div>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-risk-high">85</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm text-gray-600 dark:text-gray-400">Termination</span>
+                                                    <div class="flex items-center">
+                                                        <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                                            <div class="bg-risk-medium h-2 rounded-full" style="width: 60%"></div>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-risk-medium">60</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-sm text-gray-600 dark:text-gray-400">Confidentiality</span>
+                                                    <div class="flex items-center">
+                                                        <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                                            <div class="bg-risk-low h-2 rounded-full" style="width: 25%"></div>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-risk-low">25</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Key Issues -->
+                                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:p-6">
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Key Issues</h3>
+                                            <div class="space-y-4">
+                                                <!-- @MAP: keyIssues.map(issue => ( -->
+                                                <div class="border-l-4 border-risk-high bg-red-50 dark:bg-red-900/20 p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="flex-shrink-0">
+                                                            <i class="fas fa-exclamation-triangle text-risk-high"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">Extended Payment Terms</h4>
+                                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">90-day payment terms without penalties create cash flow risk.</p>
+                                                            <button class="mt-2 text-xs text-legal-blue hover:text-blue-800 font-medium">
+                                                                View Suggestion <i class="fas fa-arrow-right ml-1"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="border-l-4 border-risk-high bg-red-50 dark:bg-red-900/20 p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="flex-shrink-0">
+                                                            <i class="fas fa-exclamation-triangle text-risk-high"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">Unlimited Liability</h4>
+                                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">No liability cap exposes company to unlimited damages.</p>
+                                                            <button class="mt-2 text-xs text-legal-blue hover:text-blue-800 font-medium">
+                                                                View Suggestion <i class="fas fa-arrow-right ml-1"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="border-l-4 border-risk-medium bg-yellow-50 dark:bg-yellow-900/20 p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="flex-shrink-0">
+                                                            <i class="fas fa-exclamation-circle text-risk-medium"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">Short Notice Period</h4>
+                                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">5-day termination notice may be insufficient for transition.</p>
+                                                            <button class="mt-2 text-xs text-legal-blue hover:text-blue-800 font-medium">
+                                                                View Suggestion <i class="fas fa-arrow-right ml-1"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- @END_MAP )) -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Missing Protections -->
+                                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:p-6">
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Missing Protections</h3>
+                                            <div class="space-y-3">
+                                                <!-- @MAP: missingProtections.map(protection => ( -->
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-shield-alt text-gray-400 mr-3"></i>
+                                                        <span class="text-sm text-gray-900 dark:text-white">Force Majeure Clause</span>
+                                                    </div>
+                                                    <button class="text-xs text-legal-blue hover:text-blue-800 font-medium">
+                                                        Add <i class="fas fa-plus ml-1"></i>
+                                                    </button>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-shield-alt text-gray-400 mr-3"></i>
+                                                        <span class="text-sm text-gray-900 dark:text-white">Intellectual Property Rights</span>
+                                                    </div>
+                                                    <button class="text-xs text-legal-blue hover:text-blue-800 font-medium">
+                                                        Add <i class="fas fa-plus ml-1"></i>
+                                                    </button>
+                                                </div>
+                                                
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-shield-alt text-gray-400 mr-3"></i>
+                                                        <span class="text-sm text-gray-900 dark:text-white">Dispute Resolution</span>
+                                                    </div>
+                                                    <button class="text-xs text-legal-blue hover:text-blue-800 font-medium">
+                                                        Add <i class="fas fa-plus ml-1"></i>
+                                                    </button>
+                                                </div>
+                                                <!-- @END_MAP )) -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Actions -->
+                                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                                        <div class="px-4 py-5 sm:p-6">
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+                                            <div class="space-y-3">
+                                                <button class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                    <i class="fas fa-download mr-2"></i>
+                                                    Export Analysis
+                                                </button>
+                                                <button class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                    <i class="fas fa-share-alt mr-2"></i>
+                                                    Share Analysis
+                                                </button>
+                                                <button class="w-full flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-legal-blue hover:bg-blue-700">
+                                                    <i class="fas fa-comments mr-2"></i>
+                                                    Start Q&A Session
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: RightPanel -->
+                        </div>
+                        <!-- @END_COMPONENT: TwoPanelLayout -->
+                    </div>
+                </div>
+            </main>
+            <!-- @END_COMPONENT: MainWorkspace -->
+        </div>
+        <!-- @END_COMPONENT: MainContent -->
+    </div>
+    <!-- @END_COMPONENT: AppLayout -->
+
+    <!-- @COMPONENT: LoadingModal -->
+    <div id="loadingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-legal-blue">
+                    <i class="fas fa-cog fa-spin text-white text-xl"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mt-4">Analyzing Contract</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Processing your contract with Gemini AI...
+                    </p>
+                    <div class="mt-4">
+                        <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-legal-blue h-2 rounded-full transition-all duration-300 ease-out" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LoadingModal -->
+
+    <!-- @COMPONENT: RiskTooltip -->
+    <div id="riskTooltip" class="absolute bg-gray-900 text-white text-sm rounded-lg py-2 px-3 pointer-events-none opacity-0 transition-opacity duration-200 z-50 max-w-xs">
+        <div class="tooltip-content"></div>
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+    </div>
+    <!-- @END_COMPONENT: RiskTooltip -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        (function() {
+            // Dark mode toggle functionality
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const html = document.documentElement;
+            
+            // Check for saved theme preference or default to light mode
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                html.classList.add('dark');
+            }
+            
+            darkModeToggle.addEventListener('click', function() {
+                html.classList.toggle('dark');
+                const theme = html.classList.contains('dark') ? 'dark' : 'light';
+                localStorage.setItem('theme', theme);
+            });
+
+            // Risk highlighting hover effects
+            const riskElements = document.querySelectorAll('[data-risk]');
+            const tooltip = document.getElementById('riskTooltip');
+            
+            riskElements.forEach(element => {
+                element.addEventListener('mouseenter', function(e) {
+                    const riskLevel = e.target.getAttribute('data-risk');
+                    const title = e.target.getAttribute('title');
+                    
+                    tooltip.querySelector('.tooltip-content').textContent = title;
+                    tooltip.style.opacity = '1';
+                    
+                    // Position tooltip
+                    const rect = e.target.getBoundingClientRect();
+                    tooltip.style.left = rect.left + (rect.width / 2) + 'px';
+                    tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    tooltip.style.opacity = '0';
+                });
+            });
+
+            // File upload simulation
+            document.addEventListener('click', function(e) {
+                if (e.target.textContent.includes('Upload Contract')) {
+                    e.preventDefault();
+                    showLoadingModal();
+                    
+                    // Simulate API call to Gemini
+                    setTimeout(() => {
+                        hideLoadingModal();
+                        // TODO: Process uploaded file and send to Gemini API
+                        // TODO: Update UI with analysis results
+                    }, 3000);
+                }
+            });
+
+            function showLoadingModal() {
+                document.getElementById('loadingModal').classList.remove('hidden');
+                // TODO: Implement actual file processing and API integration
+            }
+
+            function hideLoadingModal() {
+                document.getElementById('loadingModal').classList.add('hidden');
+            }
+
+            // Copy to clipboard functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.textContent.includes('Copy')) {
+                    e.preventDefault();
+                    // TODO: Implement clipboard functionality
+                    console.log('Copy functionality triggered');
+                }
+            });
+
+            // Clause navigation
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.contract-section')) {
+                    // TODO: Implement smooth scrolling to clause sections
+                    console.log('Navigate to clause section');
+                }
+            });
+
+            // Search functionality
+            const searchInput = document.querySelector('input[type="search"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value;
+                    // TODO: Implement contract text search and highlighting
+                    console.log('Search query:', query);
+                });
+            }
+
+            // Export functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.textContent.includes('Export')) {
+                    e.preventDefault();
+                    // TODO: Implement export to PDF/Word/JSON
+                    console.log('Export analysis triggered');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
