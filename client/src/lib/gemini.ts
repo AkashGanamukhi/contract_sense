@@ -22,8 +22,23 @@ const fetchApiKey = async (): Promise<string> => {
     
     return config.geminiApiKey;
   } catch (error) {
+    // Attempt build-time fallback (Vite embeds VITE_... vars at build time)
+    try {
+      const buildTimeKey = (import.meta as any).VITE_GEMINI_API_KEY || (window as any).__GEMINI_API_KEY;
+      if (buildTimeKey) {
+        console.warn('Using build-time Gemini API key fallback. Prefer server-side API for security.');
+        return buildTimeKey as string;
+      }
+    } catch (_) {
+      // ignore access errors
+    }
+
     console.error('Failed to fetch API key:', error);
-    throw error;
+    // Surface a clearer error for deployment debugging
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Config API error: ${msg}. On Vercel ensure you deploy the repository root so /api functions (api/config) are available, or set VITE_GEMINI_API_KEY at build time.`
+    );
   }
 };
 
