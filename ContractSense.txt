@@ -1,0 +1,177 @@
+High-level overview
+Main goal: Contract Sense is a client-focused contract analysis tool that extracts text from uploaded contracts (PDF/DOCX), runs an AI-driven risk analysis (Gemini/Google GenAI), surfaces clause-level insights and risk summaries, and lets users ask follow-up contract questions. It’s designed as a lightweight demo / frontend-first product with optional backend helper endpoints.
+Problem it solves: Quickly identify material risks and suggestions in legal contracts without a lawyer — helps non-experts spot problematic clauses, missing protections, and get plain-language summaries and negotiation suggestions.
+Tech stack (high level):
+Frontend: React (TypeScript) + Vite, Tailwind CSS, Radix UI primitives, TanStack React Query
+AI: Google GenAI client (@google/genai) — "Gemini" model usage
+File parsing: pdfjs-dist for PDFs, mammoth for DOCX
+Backend (minimal): Express server used for development helper endpoints (serves config, Gemini test) and optionally for Vite dev integration
+(Present but not used for persistence in current code): Drizzle ORM + Neon/@neondatabase/serverless present in deps and drizzle.config.ts for future DB integration
+Architecture / Folder structure (key modules)
+Top-level structure (important folders/files):
+
+client — the React app
+src/main.tsx — client bootstrapping (Vite + React)
+src/App.tsx — main app container & routes
+src/components/ — UI components (upload modal, clause explorer, contract viewer, risk insights, theme provider, etc.)
+src/hooks/ — React hooks like use-contract-analysis, use-toast, use-mobile
+src/lib/ — client-side utilities:
+file-processing.ts — PDF/DOCX extraction logic
+gemini.ts — client-side wrapper for Google GenAI interactions (fetches API key from /api/config, constructs prompts, parses JSON)
+queryClient.ts, utils.ts
+server — minimal Node/Express server used primarily in dev
+index.ts — server entry, sets up Express, logging, Vite middleware in dev
+routes.ts — defines small API endpoints (e.g., /api/config, /api/test-gemini)
+storage.ts — currently stubbed: indicates data is stored client-side (localStorage)
+vite.ts — helper to integrate Vite in dev (serve client via dev server)
+shared
+schema.ts — Zod schemas and TypeScript types used by both client and potential server-side code (clause, contract analysis shapes)
+Config, build files:
+package.json — scripts & dependencies
+drizzle.config.ts — DB migration config (present; expects DATABASE_URL)
+vite.config.ts, tsconfig.json, tailwind.config.ts
+How components interact (high level):
+
+Frontend does heavy lifting: file extraction → AI call → analysis display.
+Backend mostly used for developer support: provides a small /api/config endpoint (returns Gemini API key for client use) and a /api/test-gemini endpoint to check API connectivity from server-side. The backend also sets up Vite for dev hosting.
+Storage currently: localStorage in the browser (no server-side DB integration in current runtime), though Drizzle/Neon are present for future persistence.
+Main flow — what happens when the user interacts
+User opens the app (client served by Vite in dev; static files in production).
+User clicks “Upload” and selects a file (PDF/DOCX).
+Client-side validation (validateFileType / validateFileSize) runs.
+File text extraction:
+If DOCX: mammoth.extractRawText(...) extracts text reliably.
+If PDF: pdfjs-dist is used page-by-page; errors or image-only PDFs are handled with user-facing messages that suggest DOCX for best results.
+After extraction, the app calls analyzeContract (in gemini.ts).
+analyzeContract builds a domain-aware prompt and calls Google GenAI (gemini-2.5-flash) to request structured JSON with a riskScore, clause list, keyIssues, missingProtections, riskBreakdown, plainLanguageSummary, etc.
+The client fetches the API key from /api/config on the server and constructs a GoogleGenAI instance with it (note: the current project exposes the key client-side via /api/config — see security note below).
+The returned JSON is parsed, validated against schema.ts types (Zod shapes used for type safety), and then persisted in localStorage via storeAnalysis (so the user can see the analysis later).
+UI components (contract-viewer, clause-explorer, risk-insights) render the analysis:
+Clause explorer shows clause-level risk, explanations, suggestions
+Risk insights show aggregated scores and breakdowns
+There's also a Q&A feature askContractQuestion that sends follow-up questions to the same AI wrapper and returns plain-language answers
+Optionally, users can revisit analyses via a dashboard (recent analyses are stored in localStorage).
+Important files — entry points & what they do
+package.json — scripts and dependencies.
+dev — runs tsx server/index.ts for dev (starts Express + Vite integration).
+build — runs vite build then bundles server with esbuild.
+start — runs production dist/index.js.
+db:push — drizzle-kit push (for database migrations if you wire DB).
+index.ts — server entry. Sets up Express, JSON parsing, request logging, error handler, and hooks registerRoutes. Integrates Vite in dev.
+routes.ts — defines:
+GET /api/config — returns geminiApiKey (from env or default demo key).
+POST /api/test-gemini — server-side check to call GenAI.
+storage.ts — currently a stub showing this is front-end-only; contains MemStorage and comment about localStorage usage.
+file-processing.ts — extracts text from PDF/DOCX; validates input and provides structured ProcessedFile.
+gemini.ts — constructs domain-aware prompts, initializes GoogleGenAI client, calls models.generateContent, parses JSON responses into ContractAnalysis.
+use-contract-analysis.ts — React Query hooks used by UI components to upload files, run analysis, and store/retrieve analyses locally.
+schema.ts — Zod schemas and TS types (risk levels, clause schema, contractAnalysis schema).
+drizzle.config.ts — Drizzle configuration for DB migrations (present but DB usage is optional; config expects DATABASE_URL).
+vite.config.ts, tailwind.config.ts, tsconfig.json — standard build/type configs.
+Core logic / algorithms (conceptual)
+File extraction:
+DOCX: uses mammoth to extract raw text reliably, returning one big string.
+PDF: iterates pages with pdfjs-dist, pulls text items from page content. The code logs/handles page-level extraction failures (e.g., scanned image PDFs).
+Both flows validate word count and provide user-friendly error messages (e.g., if file contains only images).
+Domain detection:
+gemini.ts contains detectContractDomain(...) which uses regex keyword matching to pick a domain (finance, real_estate, technology, etc.). This domain choice modifies risk scoring thresholds and messaging in the AI system prompt.
+AI prompting + structured JSON contract analysis:
+The client builds a system prompt that explains evaluation philosophy and domain-specific scoring rules and asks the GenAI model to return JSON following a strict schema (riskScore, clause objects, missingProtections, keyIssues, riskBreakdown, summary, etc.).
+The returned JSON is parsed and mapped to the ContractAnalysis type.
+The design intentionally asks the model to be balanced (flag only material and industry-unusual issues). The prompt includes penalty/bonus point heuristics to help keep riskScore interpretable (0–100).
+Client-side persistence:
+Analyses are saved to localStorage so the demonstration remains stateless on the server and works offline/locally without DB setup.
+Q&A:
+A follow-up question API calls the same GenAI client with a Q&A-style system prompt instructing the model to reference contract clauses and answer in plain English.
+UI:
+Clause-level data (startIndex/endIndex) allows the UI to highlight or navigate to clause text ranges inside the contract viewer.
+Dependencies and why they’re used
+(derived from package.json — key ones)
+
+React + React DOM (react, react-dom) — UI
+Vite (vite) + @vitejs/plugin-react — fast dev server and build (React + ESM)
+TypeScript (typescript, @types/*) — typed safety and maintainability
+Tailwind CSS (tailwindcss, @tailwindcss/typography) — utility-first styling
+Radix UI packages (@radix-ui/*) — accessible headless UI primitives
+TanStack React Query (@tanstack/react-query) — data fetching & mutation management
+Google GenAI client (@google/genai) — contract analysis model (Gemini)
+pdfjs-dist (pdfjs-dist) — PDF text extraction
+mammoth (mammoth) — DOCX text extraction
+Zod (zod) — runtime schema and validation for analyses
+express (express) — small backend to serve config/test endpoints and manage dev integration
+driz zle-orm + drizzle-kit (drizzle-orm, drizzle-kit) and @neondatabase/serverless — present for potential DB integration and migrations
+esbuild, tsx — build and dev tooling
+Other UI/UX libs: framer-motion, lucide-react, recharts — UI polish and charts
+Auth/session libraries present but not actively used in current code: passport, express-session and related typings
+Why chosen:
+
+Gemeni/Google GenAI: strong LLM for structured analysis and Q&A.
+mammoth for DOCX because it yields reliable text extraction; pdfjs-dist for PDF support.
+React + Vite + TypeScript for a fast developer experience and production build.
+Radix + Tailwind for accessible, composable UI and fast styling.
+Zod for robust runtime validation of AI outputs, reducing runtime errors from model responses.
+Security & design notes (things an interviewer may probe)
+The project currently exposes an API key to the frontend via /api/config (the key is returned for client-side GoogleGenAI initialization). That is insecure for production because the model key can be extracted. For production:
+Move all AI calls to a server-side endpoint and never expose the API key to client.
+Implement rate-limiting and an authorization scheme.
+PDF extraction client-side can fail for scanned images — ideal pipeline would include OCR step (Tesseract or cloud OCR).
+LocalStorage persistence is fine for demo but not for multi-user or collaborative use — add server-side DB (Drizzle + Neon) to persist, share, and version analyses.
+Prompt engineering is central; you’ll want tests/guardrails for AI outputs (Zod helps) and fallback behaviors.
+Cost and latency: calling large GenAI models from client may be slower and can exhaust quotas — server-side batching, caching, or embeddings+vector DB architecture could help.
+How to run / relevant scripts
+Key scripts (from package.json):
+
+Dev: npm run dev — starts server (Express + Vite dev server) using tsx server/index.ts
+Build: npm run build — builds client with Vite and bundles server with esbuild
+Start: npm run start — runs the production server dist/index.js
+DB migrations (if you set up DB): npm run db:push (drizzle-kit push)
+Note: On Windows shells, environment variable assignment in npm scripts can behave differently (the script uses NODE_ENV=...). Often npm run dev works out-of-the-box; if not, install cross-env or run with PowerShell environment variable syntax when needed.
+
+Interview prep: 2-minute pitch
+“Contract Sense is a browser-first contract analysis tool that helps non-lawyers quickly find material risks in PDF and DOCX contracts. The app extracts text client-side (using mammoth for DOCX and pdfjs-dist for PDF), sends the contract text to a GenAI model (Gemini) with a domain-aware prompt to produce structured JSON (clause-level risk, key issues, missing protections, and a plain-language summary), and surfaces those results interactively with a React UI. It's built with TypeScript, Vite, and Tailwind for quick iteration, and uses Zod to validate the AI’s structured output. The current implementation keeps analyses in the browser (localStorage) for simplicity, but the codebase includes Drizzle and Neon config to add server-side persistence and multi-user features later.”
+
+Key talking points:
+
+Frontend-first design: extracts and analyzes client-side to avoid backend maintenance for demo usage.
+Prompt engineering & schema validation: the app asks for structured JSON and validates it with zod to reduce AI output brittleness.
+Domain-aware analysis: keyword-based domain detection tailors risk thresholds and messaging.
+Extensible architecture: small server layer for dev/test, and existing Drizzle config to add DB persistence.
+Practical tradeoffs: client-side convenience vs. production security (API key exposure) and the plan to move AI calls server-side.
+Potential follow-up interview questions to prepare for:
+
+How do you ensure AI outputs are trustworthy and safe? (Answer: use Zod to validate shape, build guardrails/heuristics, human review step, server-side moderation, logging, and fallback messages.)
+Why process files client-side vs server-side? (Answer: reduces server complexity and cost for demo; avoids server handling of large files; but talk about the security implications and when to move to server.)
+How would you scale or secure the AI usage? (Answer: move API calls server-side, add auth, caching, rate-limits, embed + vector DB for better Q&A, batching, and cost controls.)
+How to handle image-only PDFs? (Answer: add OCR stage; consider Tesseract on server or an OCR cloud service.)
+How to validate the model’s legal correctness? (Answer: human-in-loop, model-agnostic regression tests with labelled contract examples, and domain rules.)
+Quick Q&A simulation (3–5 likely questions + ideal answers)
+Q: The app exposes the Gemini API key via /api/config to the client. Is that safe — if not, how would you fix it?
+Ideal answer:
+
+Not safe for production. Exposing keys to the client allows extraction and abuse.
+Fix: move all calls to the GenAI model to server-side endpoints that require user authentication. The server holds the API key in environment variables. Implement rate limiting, usage logging, and additional auth (JWT/session). Optionally proxy calls through a trusted service and apply content moderation and input/output validation.
+Q: How do you ensure the model returns the exact JSON structure you need?
+Ideal answer:
+
+Use a strong prompt asking explicitly for JSON and include an example schema.
+Use runtime validation with Zod (already in schema.ts) to assert the shape and types; if validation fails, handle gracefully (retry with clarifying prompt, fallback to a conservative error message, or run heuristics to salvage partial output).
+Use automated tests with sample contract inputs and expected structure to catch regressions.
+Q: The repo contains Drizzle/Neon config but the storage is client-side. How would you implement persistent server-side storage?
+Ideal answer:
+
+Add server endpoints (e.g., POST /api/analyses, GET /api/analyses/:id) that store ContractAnalysis objects in a Postgres DB with Drizzle ORM.
+Secure endpoints with authentication and authorization (so only owner can view analyses).
+Migrate localStorage usage to server, and use indexing (by user, title, riskScore, createdAt) for fast queries.
+Consider encrypted storage for sensitive contract content or avoid storing full contract text depending on privacy policy.
+Q: What are the main edge cases the project must handle and how does it currently do so?
+Ideal answer:
+
+Image-only or scanned PDFs: PDF text extraction returns empty — current code suggests converting to DOCX; robust solution is OCR (server-side Tesseract or cloud OCR).
+Large files: validate file size and potentially chunk long contracts into segments for analysis.
+LLM hallucinations or malformed JSON: mitigate with explicit prompts, Zod validation, and retry logic or fallbacks.
+API failures / quotas: detect errors, show friendly messages, and optionally queue requests or use smaller models.
+Q: Why choose client-side AI calls (the current approach) vs server-side?
+Ideal answer:
+
+Client-side reduces server complexity and cost for a demo, and can reduce latency for small workloads. It allows rapid prototyping without building authenticated server flows.
+Downsides: exposes API keys and increases risk/cost exposure. For production, server-side calls are preferred for security, centralized logging, caching, and quota control.
