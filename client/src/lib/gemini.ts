@@ -423,7 +423,7 @@ export async function askContractQuestion(
     - Consider industry standards when evaluating contract terms`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
       },
